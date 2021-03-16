@@ -2,6 +2,7 @@ const router = require('koa-router')()
 
 const jwt = require('../jwt')
 
+const user = require('../model/user/index')
 router.get('/', async (ctx, next) => {
   await ctx.render('index', {
     title: 'Hello Koa 2!'
@@ -9,7 +10,8 @@ router.get('/', async (ctx, next) => {
 })
 
 router.get('/string', async (ctx, next) => {
-  ctx.body = 'koa2 string'
+  const value = await user.find({})
+  ctx.body = value
 })
 
 router.get('/json', async (ctx, next) => {
