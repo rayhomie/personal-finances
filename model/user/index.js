@@ -1,8 +1,19 @@
-const user = require('../../dbs/user/index');
 const UserModel = require('../../dbs/user/index')
 
 
 class UserController {
+  findOne(json) {
+    return new Promise((resolve, reject) => {
+      UserModel.findOne(json, (err, docs) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(docs)
+      })
+    })
+  }
+
   find(json) {
     return new Promise((resolve, reject) => {
       UserModel.find(json, (err, docs) => {

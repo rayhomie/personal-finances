@@ -5,7 +5,10 @@ var User = new mongoose.Schema({ // 实列化mongoose映射
     trim: true,// 自动给name字段的内容去掉左右空格
     unique: true
   },
-  password: String,
+  password: {
+    type: String,
+    trim: true,
+  },
   avatar_url: String,
   gender: {
     type: Number,

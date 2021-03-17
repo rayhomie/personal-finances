@@ -1,8 +1,8 @@
 const router = require('koa-router')()
-
+const crypto = require("crypto")
 const jwt = require('../jwt')
-
 const user = require('../model/user/index')
+
 router.get('/', async (ctx, next) => {
   await ctx.render('index', {
     title: 'Hello Koa 2!'
@@ -11,8 +11,8 @@ router.get('/', async (ctx, next) => {
 
 router.get('/register', async (ctx, next) => {
   const value = await user.register({
-    username: 'zzz211',
-    password: '123456',
+    username: 'zzz1',
+    password: crypto.createHash('md5').update('123456').digest('hex'),
     avatar_url: 's',
     gender: 1,
     mobile_number: '123213'
