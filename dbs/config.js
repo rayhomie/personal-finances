@@ -1,7 +1,4 @@
 // 配置文件
-
-const App = {
+module.exports = {
   dbUrl: 'mongodb://localhost:27017/koa',
 }
-
-module.exports = App

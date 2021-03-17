@@ -9,8 +9,14 @@ router.get('/', async (ctx, next) => {
   })
 })
 
-router.get('/string', async (ctx, next) => {
-  const value = await user.find({})
+router.get('/register', async (ctx, next) => {
+  const value = await user.register({
+    username: 'zzz211',
+    password: '123456',
+    avatar_url: 's',
+    gender: 1,
+    mobile_number: '123213'
+  })
   ctx.body = value
 })
 
