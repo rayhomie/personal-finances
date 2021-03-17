@@ -1,13 +1,14 @@
 const crypto = require("crypto"),
   jwt = require("jsonwebtoken"),
-  user = require("./model/user/index");
+  user = require("./model/user/index"),
+  secret = require('./secret.json');
 // TODO:使用数据库
 // 这里应该是用数据库存储，这里只是演示用
 // let userList = [{ name: 'rayhomie', password: crypto.createHash('md5').update('123456').digest('hex') }];
 
 class UserController {
   // 用户登录
-  static async login(ctx, callback) {
+  static async login(ctx) {
     const data = ctx.request.query;
     if (!data.username || !data.password) {
       return ctx.body = {
@@ -21,7 +22,7 @@ class UserController {
         {
           name: result.username
         },
-        "Gopal_token", // secret
+        secret.sign, // secret
         { expiresIn: 60 * 60 } // 60 * 60 s
       );
       return ctx.body = {

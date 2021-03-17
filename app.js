@@ -5,6 +5,8 @@ const json = require('koa-json')
 // const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+const jwtKoa = require('koa-jwt')
+const secret = require('./secret.json');
 
 const index = require('./routes/index')
 
@@ -22,6 +24,11 @@ app.use(require('koa-static')(__dirname + '/public'))
 app.use(views(__dirname + '/views', {
   extension: 'pug'
 }))
+
+// 除去一些没必要通过jwt验证
+// app.use(jwtKoa({ secret: secret.sign }).unless({
+//   path: [/^\/api\/login/, /^\/api\/register/]
+// }))
 
 // logger
 app.use(async (ctx, next) => {
