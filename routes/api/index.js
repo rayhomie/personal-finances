@@ -10,18 +10,21 @@ router.get('/', async (ctx, next) => {
 })
 
 // 登录
-router.get('/login', async (ctx, next) => {
+router.post('/login', async (ctx, next) => {
   await jwt.login(ctx)
 })
 
 // 注册
-router.get('/register', async (ctx, next) => {
+router.post('/register', async (ctx, next) => {
+  const { password, ...rest } = ctx.request.body
   const value = await user.register({
-    username: 'zzz1',
+    // username: 'zzz1',
+    // password: crypto.createHash('md5').update('123456').digest('hex'),
+    // avatar_url: 's',
+    // gender: 1,
+    // mobile_number: '123213'
     password: crypto.createHash('md5').update('123456').digest('hex'),
-    avatar_url: 's',
-    gender: 1,
-    mobile_number: '123213'
+    ...rest
   })
   ctx.body = value
 })

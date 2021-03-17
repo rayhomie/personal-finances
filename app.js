@@ -7,6 +7,7 @@ const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const jwtKoa = require('koa-jwt')
 const secret = require('./secret.json');
+const VTM = require('./verify-token-middleware')
 
 const index = require('./routes/index')
 
@@ -25,10 +26,12 @@ app.use(views(__dirname + '/views', {
   extension: 'pug'
 }))
 
+app.use(VTM())
+
 // 除去一些没必要通过jwt验证
-// app.use(jwtKoa({ secret: secret.sign }).unless({
-//   path: [/^\/api\/login/, /^\/api\/register/]
-// }))
+app.use(jwtKoa({ secret: secret.sign }).unless({
+  path: [/^\/api\/login/, /^\/api\/register/]
+}))
 
 // logger
 app.use(async (ctx, next) => {

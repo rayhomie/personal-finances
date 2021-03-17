@@ -9,7 +9,7 @@ const crypto = require("crypto"),
 class UserController {
   // 用户登录
   static async login(ctx) {
-    const data = ctx.request.query;
+    const data = ctx.request.body;
     if (!data.username || !data.password) {
       return ctx.body = {
         code: "000002",
