@@ -17,10 +17,12 @@ class UserController {
       }
     }
     const result = await user.findOne({ username: data.username, password: crypto.createHash('md5').update(data.password).digest('hex') })
-    if (result) {
+    console.log(result)
+    if (result.docs) {
       const token = jwt.sign(
         {
-          name: result.username
+          name: result.docs.username,
+          id: result.docs._id
         },
         secret.sign, // secret
         { expiresIn: 60 * 60 } // 60 * 60 s

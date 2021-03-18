@@ -26,6 +26,7 @@ app.use(views(__dirname + '/views', {
   extension: 'pug'
 }))
 
+// 验证请求header中的token是否有效
 app.use(VTM())
 
 // 除去一些没必要通过jwt验证

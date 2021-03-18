@@ -13,8 +13,8 @@ module.exports = () => {
         let payload
         try {
           payload = await verify(token.split(' ')[1], secret.sign)
-          ctx.user = {
-            username: payload.username,
+          ctx.state.userinfo = {
+            username: payload.name,
             id: payload.id
           }
         } catch (e) {

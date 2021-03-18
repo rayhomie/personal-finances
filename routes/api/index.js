@@ -2,6 +2,7 @@ const router = require('koa-router')()
 const jwt = require('../../jwt')
 const crypto = require("crypto")
 const user = require('../../model/user/index')
+const userRouter = require('./user/index')
 
 router.get('/', async (ctx, next) => {
   await ctx.render('index', {
@@ -28,5 +29,7 @@ router.post('/register', async (ctx, next) => {
   })
   ctx.body = value
 })
+
+router.use('/user', userRouter)
 
 module.exports = router.routes()
