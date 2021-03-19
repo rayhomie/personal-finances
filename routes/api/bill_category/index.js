@@ -32,8 +32,17 @@ router.post('/update', async (ctx, next) => {
 
 // 删除账单分类
 router.delete('/delete', async (ctx, next) => {
-  const data = ctx.request.body
-  console.log(data)
-  ctx.body = data
+  const { title, id } = ctx.request.body
+  if (title || id) {
+    const res = await billCategory.deleteOne({
+      ...(id ? { _id: ObjectId(id) } : {}),
+      ...(title ? { title } : {}),
+    })
+    ctx.body = res
+  } else {
+    ctx.body = {
+      code: 1, info: '请核对删除条件,删除失败'
+    }
+  }
 })
 module.exports = router.routes()

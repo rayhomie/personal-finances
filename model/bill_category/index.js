@@ -51,7 +51,15 @@ class BillCategoryController {
   }
 
   deleteOne(json) {
-
+    return new Promise((resolve, reject) => {
+      BillCategoryModel.remove(json, (err, docs) => {
+        if (err) {
+          resolve({ err, code: 1, info: '删除失败' })
+          return
+        }
+        resolve({ docs, code: 0, info: '删除成功' })
+      })
+    })
   }
 }
 
