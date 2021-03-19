@@ -17,18 +17,26 @@ router.post('/insert', async (ctx, next) => {
 })
 
 // 修改账单分类
+/*
+交换新旧index顺序的时候，需要前端同号输入新旧index
+（所以在交换index之前需要查询一下数据量中的index的正负号）
+*/
 router.post('/update', async (ctx, next) => {
-  const { id, title, new_title, new_isIncome, new_icon } = ctx.request.body
+  const { id, title, index, new_title, new_isIncome, new_icon, new_index } = ctx.request.body
   const res = await billCategory.updateOne({
     ...(id ? { _id: ObjectId(id) } : {}),
     ...(title ? { title } : {}),
+    ...(index ? { index } : {}),
   }, {
     ...(new_title ? { title: new_title } : {}),
     ...(new_isIncome ? { isIncome: parseInt(new_isIncome) } : {}),
     ...(new_icon ? { icon: new_icon } : {}),
+    ...(new_index ? { index: -1 * parseInt(new_index) } : {}),
   })
   ctx.body = res
 })
+
+// 修改交换分类的index
 
 // 删除账单分类
 router.delete('/delete', async (ctx, next) => {

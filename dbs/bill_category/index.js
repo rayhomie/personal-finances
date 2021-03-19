@@ -15,6 +15,10 @@ var Bill_category = new mongoose.Schema({ // 实列化mongoose映射
     type: Number,
     default: 0,
     required: true,
+  },
+  index: {
+    type: Number,
+    default: 0,
   }
 });
 module.exports = mongoose.model('Bill_category', Bill_category, 'bill_category') // 创建一个mongoose对象模型

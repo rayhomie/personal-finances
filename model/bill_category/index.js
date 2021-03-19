@@ -18,9 +18,10 @@ class BillCategoryController {
   }
 
   insertOne(json) {
-    return new Promise((resolve, reject) => {
-      const instance = new BillCategoryModel(json)
-      instance.save((err, docs) => {
+    return new Promise(async (resolve, reject) => {
+      const res = await this.findList({})
+      const instance = await new BillCategoryModel({ ...json, index: res.docs.length + 1 })
+      await instance.save((err, docs) => {
         if (err) {
           resolve({ err, code: 1 });
           return
