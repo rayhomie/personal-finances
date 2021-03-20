@@ -58,7 +58,11 @@ class BillCategoryController {
           resolve({ err, code: 1, info: '删除失败' })
           return
         }
-        resolve({ docs, code: 0, info: '删除成功' })
+        if (docs.n === 1 && docs.deletedCount === 1) {
+          resolve({ docs, code: 0, info: '删除成功' })
+        } else {
+          resolve({ docs, code: 1, info: '删除失败' })
+        }
       })
     })
   }
