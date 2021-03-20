@@ -4,6 +4,7 @@ const crypto = require("crypto")
 const user = require('../../model/user/index')
 const userRouter = require('./user/index')
 const billCategoryRouter = require('./bill_category/index')
+const billRouter = require('./bill/index')
 
 router.get('/', async (ctx, next) => {
   await ctx.render('index', {
@@ -34,5 +35,7 @@ router.post('/register', async (ctx, next) => {
 router.use('/user', userRouter)
 
 router.use('/bill_category', billCategoryRouter)
+
+router.use('/bill', billRouter)
 
 module.exports = router.routes()
