@@ -12,7 +12,7 @@ class UserController {
     const data = ctx.request.body;
     if (!data.username || !data.password) {
       return ctx.body = {
-        code: "000002",
+        code: 401,
         message: "参数不合法"
       }
     }
@@ -28,7 +28,7 @@ class UserController {
         { expiresIn: 60 * 60 } // 60 * 60 s
       );
       return ctx.body = {
-        code: "0",
+        code: 0,
         message: "登录成功",
         data: {
           token
@@ -36,7 +36,7 @@ class UserController {
       };
     } else {
       return ctx.body = {
-        code: "000002",
+        code: 401,
         message: "用户名或密码错误"
       };
     }

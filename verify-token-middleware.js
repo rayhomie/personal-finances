@@ -19,19 +19,18 @@ module.exports = () => {
           }
         } catch (e) {
           console.error('token verify failed :', e)
-
         }
       }
       await next()
     } catch (e) {
       if (e.status === 401) {
-        ctx.status = 401
+        ctx.status = 200
         ctx.body = {
           code: 401,
           message: '认证失败'
         }
       } else {
-        e.status = 404
+        ctx.status = 200
         ctx.body = {
           code: 404,
           message: '404'
