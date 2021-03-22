@@ -7,9 +7,9 @@ const billCategoryRouter = require('./bill_category/index')
 const billRouter = require('./bill/index')
 
 router.get('/', async (ctx, next) => {
-  await ctx.render('index', {
-    title: 'Hello Koa 2!'
-  })
+  ctx.body = {
+    code: 0, info: 'token验证成功'
+  }
 })
 
 // 登录
