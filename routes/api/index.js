@@ -32,6 +32,13 @@ router.post('/register', async (ctx, next) => {
   ctx.body = value
 })
 
+// 查询是否有用户名
+router.post('/hasUsername', async (ctx, next) => {
+  const { username } = ctx.request.body
+  const value = await user.findOne({ username })
+  ctx.body = value
+})
+
 router.use('/user', userRouter)
 
 router.use('/bill_category', billCategoryRouter)
