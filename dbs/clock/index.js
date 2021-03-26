@@ -2,8 +2,13 @@ var mongoose = require('../index');
 var Clock = new mongoose.Schema({ // 实列化mongoose映射
     clock_date: {
         type: Number,
-        trim: true,
-        unique: true,
+        required: true,
+    },
+    date: {
+        type: String
+    },
+    user_id: {
+        type: mongoose.Types.ObjectId,
         required: true,
     },
 });
