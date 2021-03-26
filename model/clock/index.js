@@ -9,11 +9,11 @@ class ClockController {
                     resolve({ err, code: 1 });
                     return;
                 }
-                resolve({ docs, code: 0 })
+                resolve({ docs, total: docs.length, code: 0 })
             })
         })
     }
-    
+
     findOne(json) {
         return new Promise((resolve, reject) => {
             ClockModel.findOne(json, (err, docs) => {

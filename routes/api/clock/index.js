@@ -54,33 +54,32 @@ router.get('/continueCount', async (ctx, next) => {
         clock_date.sort(function (a, b) {
             return b - a;
         })
-
-        if (clock_date[0] === now_date.startOf('date').unix()) {
-            // 判断是否当天打卡
-            // const result = clock_date.reduce((pre, cur, index) => {
-            //     if (index === 0) {
-            //         if (cur === pre[0]) {
-            //             pre[1]++
-            //             return pre
-            //         } else {
-            //             pre[0] = cur
-            //             pre[1]++
-            //             return pre
-            //         }
-            //     }
-            //     if (pre[0] - cur === 86400) {
-            //         pre[1]++
-            //         pre[0] = cur
-            //         return pre
-            //     }
-            //     return pre
-            // }, [now_date.startOf('date').unix(), 0])
+        if (
+            clock_date[0] === now_date.startOf('date').unix()
+            ||
+            clock_date[0] === now_date.add(-1, 'd').startOf('date').unix()
+        ) {
+            // 当天打卡和前一天打卡逻辑一致 
+            const result = clock_date.reduce((pre, cur, index) => {
+                if (index === 0 || pre[0] - cur === 86400) {
+                    pre[1]++
+                    pre[0] = cur
+                    return pre
+                }
+                return pre
+            }, [0, 0])
+            ctx.body = {
+                continue_count: result[1],
+                code: 0
+            }
+        } else {
+            // 否则就是不连续
+            ctx.body = {
+                continue_count: 0,
+                code: 0
+            }
         }
 
-        ctx.body = {
-            continue_count: result[1],
-            code: 0
-        }
     } else {
         ctx.body = {
             info: '接口错误，检查代码',

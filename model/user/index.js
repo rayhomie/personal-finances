@@ -21,7 +21,7 @@ class UserController {
           resolve({ err, code: 1 });
           return;
         }
-        resolve({ docs, code: 0 })
+        resolve({ docs, total: docs.length, code: 0 })
       })
     })
   }
