@@ -1,10 +1,7 @@
 const mongoose = require('../index');
-const moment = require('moment')
 const Bill = new mongoose.Schema({ // 实列化mongoose映射
   bill_time: {
-    type: String,
-    trim: true,
-    default: moment().format('YYYY-MM-DD HH:mm:ss'),
+    type: Number,
     required: true,
   },
   amount: {

@@ -1,5 +1,6 @@
 const router = require('koa-router')()
 const ObjectId = require('mongodb').ObjectId
+const moment = require('moment')
 const user = require('../../../model/user/index')
 const crypto = require("crypto")
 
@@ -12,6 +13,19 @@ router.get('/info', async (ctx, next) => {
     _id: ObjectId(id)
   })
   ctx.body = res
+})
+
+// 获取用户加入至今的天数
+router.get('/joinDays', async (ctx, next) => {
+  const { username, id } = ctx.state.userinfo
+  const res = await user.findOne({
+    username,
+    _id: ObjectId(id)
+  });
+  const { create_time } = res.docs;
+  const now_time = moment().unix();
+  const days = Math.ceil((now_time - create_time) / 86400)
+  ctx.body = { days, code: 0 }
 })
 
 // 修改除username、password之外的信息
