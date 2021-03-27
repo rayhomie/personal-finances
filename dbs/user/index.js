@@ -10,6 +10,10 @@ var User = new mongoose.Schema({ // 实列化mongoose映射
     type: String,
     required: true,
   },
+  create_time: {
+    type: Number,
+    required: true,
+  },
   avatar_url: String,
   gender: {
     type: Number,
@@ -19,4 +23,6 @@ var User = new mongoose.Schema({ // 实列化mongoose映射
   mobile_number: String,
   email: String,
 });
+
 module.exports = mongoose.model('User', User, 'user') // 创建一个mongoose对象模型
+

@@ -1,4 +1,5 @@
 const router = require('koa-router')()
+const moment = require('moment')
 const bill = require('../../../model/bill/index')
 
 //获取当前用户的所有账单可分页
@@ -10,7 +11,7 @@ router.get('/list', async (ctx, next) => {
 
 // 添加一条账单记录
 router.post('/add', async (ctx, next) => {
-  const { category_id, amount, bill_time, remark } = ctx.request.body
+  const { category_id, amount, bill_time = moment().unix(), remark } = ctx.request.body
   const res = await bill.insertOne(
     {
       user_id: ctx.state.userinfo.id,
