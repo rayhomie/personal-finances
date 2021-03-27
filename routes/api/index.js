@@ -7,6 +7,7 @@ const userRouter = require('./user/index')
 const billCategoryRouter = require('./bill_category/index')
 const billRouter = require('./bill/index')
 const clockRouter = require('./clock/index')
+const budgetRouter = require('./budget/index')
 
 router.get('/', async (ctx, next) => {
   ctx.body = {
@@ -42,5 +43,7 @@ router.use('/bill_category', billCategoryRouter)
 router.use('/bill', billRouter)
 
 router.use('/clock', clockRouter)
+
+router.use('/budget', budgetRouter)
 
 module.exports = router.routes()
