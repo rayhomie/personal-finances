@@ -64,6 +64,20 @@ class BillController {
       })
     })
   }
+
+  aggregate(arr) {
+    return new Promise((resolve, reject) => {
+      BillModel.aggregate(arr, (err, docs) => {
+        if (err) {
+          resolve({ err, code: 1, info: '管道查询出错，请检查' })
+          return
+        }
+        else {
+          resolve({ docs, code: 0 })
+        }
+      })
+    })
+  }
 }
 
 module.exports = new BillController()

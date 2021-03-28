@@ -1,17 +1,26 @@
 const router = require('koa-router')()
 const moment = require('moment')
+const ObjectId = require('mongodb').ObjectId
 const bill = require('../../../model/bill/index')
 
 //获取当前用户的所有账单可分页
 router.get('/list', async (ctx, next) => {
   const param = ctx.request.query
-  const res = await bill.findList({ user_id: ctx.state.userinfo.id, ...param })
+  const res = await bill.findList({
+    user_id: ctx.state.userinfo.id,
+    ...param
+  })
   ctx.body = res
 })
 
 // 添加一条账单记录
 router.post('/add', async (ctx, next) => {
-  const { category_id, amount, bill_time = moment().unix(), remark } = ctx.request.body
+  const {
+    category_id,
+    amount,
+    remark,
+    bill_time = moment().unix()
+  } = ctx.request.body
   const res = await bill.insertOne(
     {
       user_id: ctx.state.userinfo.id,
@@ -27,7 +36,10 @@ router.post('/add', async (ctx, next) => {
 router.post('/update', async (ctx, next) => {
   const { id, ...restParam } = ctx.request.body
   if (!id) {
-    ctx.body = { info: '请指定账单id', code: 1 };
+    ctx.body = {
+      info: '请指定账单id',
+      code: 1
+    };
     return;
   }
   const res = await bill.updateOne(
@@ -48,6 +60,78 @@ router.delete('/delete', async (ctx, next) => {
     _id: id
   })
   ctx.body = res
+})
+
+// 当月的总收支（startMonth=2021-03）
+router.get('/billboard', async (ctx, next) => {
+  const { startMonth } = ctx.request.query
+  const user_id = ObjectId(ctx.state.userinfo.id)
+  const startUnix = moment(startMonth).unix()
+  const endUnix = moment(startMonth).add(1, 'month').unix()
+  const res = await bill.aggregate(
+    [
+      {
+        $match: { user_id, bill_time: { $gte: startUnix, $lt: endUnix } }
+      },
+      {
+        $lookup: {// 关联表查询
+          from: "bill_category",// 需要关联的表是：bill_category(非主表)
+          localField: "category_id",// bill表(主表)中需要关联的字段
+          foreignField: "_id",// bill_category(非主表)中需要关联的字段
+          as: "category"// 关联查询后把bill_category(非主表)对应结果放到bill表(主表)的category字段中
+        }
+      },
+      {// 0是支出，1是收入
+        $group: { _id: { isIncome: "$category.isIncome" }, total: { $sum: "$amount" } }
+      }
+    ]
+  )
+  ctx.body = res
+})
+
+/* 
+    按照月为单位，以日期为分组的列表
+    当月的总收支（startMonth=2021-03）
+*/
+router.get('/classifyList', async (ctx, next) => {
+  const { startMonth } = ctx.request.query
+  const user_id = ObjectId(ctx.state.userinfo.id)
+  const startUnix = moment(startMonth).unix()
+  const endUnix = moment(startMonth).add(1, 'month').unix()
+  const res = await bill.aggregate(
+    [
+      {
+        $match: { user_id, bill_time: { $gte: startUnix, $lt: endUnix } }
+      },
+      {
+        $sort: { bill_time: 1 }
+      },
+      {
+        $lookup: {// 关联表查询
+          from: "bill_category",// 需要关联的表是：bill_category(非主表)
+          localField: "category_id",// bill表(主表)中需要关联的字段
+          foreignField: "_id",// bill_category(非主表)中需要关联的字段
+          as: "category"// 关联查询后把bill_category(非主表)对应结果放到bill表(主表)的category字段中
+        }
+      },
+    ]
+  )
+  if (res.docs) {
+    const newRes = new Array((endUnix - startUnix) / 86400).fill('').map((item, index) => {
+      const reslut = res.docs.filter(i =>
+        i.bill_time >= startUnix + index * 86400
+        &&
+        i.bill_time < startUnix + (index + 1) * 86400
+      )
+      return { date: startUnix + index * 86400, item: reslut }
+    });
+    ctx.body = newRes.filter(i => i.item.length > 0)
+  } else {
+    ctx.body = {
+      info: '未查询到账单',
+      code: 1
+    }
+  }
 })
 
 module.exports = router.routes()
