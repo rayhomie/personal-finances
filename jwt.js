@@ -25,7 +25,7 @@ class UserController {
           id: result.docs._id
         },
         secret.sign, // secret
-        { expiresIn: 60 * 60 } // 60 * 60 s
+        { expiresIn: 60 * 60 * 24 * 7 } // 60 * 60 s
       );
       return ctx.body = {
         code: 0,
