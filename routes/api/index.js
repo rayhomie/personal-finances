@@ -29,7 +29,7 @@ router.post('/register', async (ctx, next) => {
     // avatar_url: 's',
     // gender: 1,
     // mobile_number: '123213'
-    password: crypto.createHash('md5').update('123456').digest('hex'),
+    password: crypto.createHash('md5').update(password).digest('hex'),
     create_time: moment().unix(),
     ...rest
   } : rest)
