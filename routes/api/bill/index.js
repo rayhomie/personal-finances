@@ -117,6 +117,7 @@ router.get('/classifyList', async (ctx, next) => {
     ]
   )
   if (res.docs) {
+    // 将当月的账单按照每天进行分类区分出来
     const newRes = new Array((endUnix - startUnix) / 86400).fill('').map((item, index) => {
       const reslut = res.docs.filter(i =>
         i.bill_time >= startUnix + index * 86400
@@ -125,7 +126,22 @@ router.get('/classifyList', async (ctx, next) => {
       )
       return { date: startUnix + index * 86400, item: reslut }
     });
-    ctx.body = newRes.filter(i => i.item.length > 0)
+    // 将没有进行记账的日期进行过滤
+    const filterRes = newRes.filter(i => i.item.length > 0)
+    // 分别计算当天的收支情况
+    const lastRes = filterRes.map(i => {
+      const value = i.item.reduce((pre, cur) => {
+        if (cur.category[0].isIncome === 1) {
+          pre[0] = pre[0] + cur.amount
+          return pre
+        } else {
+          pre[1] = pre[1] - cur.amount
+          return pre
+        }
+      }, [0, 0])
+      return { ...i, income: value[0], expend: value[1] }
+    })
+    ctx.body = lastRes
   } else {
     ctx.body = {
       info: '未查询到账单',
