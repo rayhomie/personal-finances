@@ -75,14 +75,17 @@ router.post('/username', async (ctx, next) => {
 router.post('/pwd', async (ctx, next) => {
   const { password } = ctx.request.body
   const { username, id } = ctx.state.userinfo
-  console.log(password, ctx.state.userinfo)
   const res = await user.updateOne({
     username,
     _id: ObjectId(id)
   }, {
     password: crypto.createHash('md5').update(password).digest('hex')
   })
-  ctx.body = res
+  if (res.docs.nModified === 0) {
+    ctx.body = { ...res, info: '密码和之前的一致，未变动', code: 0 }
+  } else {
+    ctx.body = { ...res, info: '密码已更改，请重新登陆', code: 401 }
+  }
 })
 
 
