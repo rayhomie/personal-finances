@@ -31,7 +31,7 @@ class UserController {
       const instance = new UserModel(json)
       instance.save((err, docs) => {
         if (err) {
-          resolve({ err, code: 1 });
+          resolve({ err, code: 401 });
           return
         }
         resolve({ docs, code: 0, register: 1 })

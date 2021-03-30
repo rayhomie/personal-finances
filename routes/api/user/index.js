@@ -30,17 +30,23 @@ router.get('/joinDays', async (ctx, next) => {
 
 // 修改除username、password之外的信息
 router.post('/updateInfo', async (ctx, next) => {
-  const { avatar_url, gender, mobile_number } = ctx.request.body
+  const { avatar_url, gender, mobile_number, email } = ctx.request.body
   const { username, id } = ctx.state.userinfo
   const res = await user.updateOne({
     username,
     _id: ObjectId(id)
   }, {
-    avatar_url,
-    gender,
-    mobile_number
+    ...(avatar_url ? { avatar_url } : {}),
+    ...(gender !== undefined ? { gender } : {}),
+    ...(mobile_number ? { mobile_number } : {}),
+    ...(email ? { email } : {}),
   })
-  ctx.body = res
+  console.log(ctx.request.body, res);
+  if (res.docs.n === 1 && res.docs.nModified === 1) {
+    ctx.body = { ...res, info: '修改成功' }
+  } else {
+    ctx.body = { ...res, code: 1, info: '修改失败' }
+  }
 })
 
 // 修改username
@@ -57,9 +63,9 @@ router.post('/username', async (ctx, next) => {
     })
     // 如果数据库中的数据有一条被修改则成功，否则需要重新登陆携带token
     if (res.docs.nModified === 0) {
-      ctx.body = { info: '账号已更改，请重新登陆', code: 1 }
+      ctx.body = { info: '账号已更改，请重新登陆', code: 401 }
     } else {
-      ctx.body = res
+      ctx.body = { ...res, code: 401 }
     }
   } else {
     ctx.body = { info: '用户名已存在', code: 1 }
