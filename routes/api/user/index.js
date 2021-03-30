@@ -41,7 +41,6 @@ router.post('/updateInfo', async (ctx, next) => {
     ...(mobile_number ? { mobile_number } : {}),
     ...(email ? { email } : {}),
   })
-  console.log(ctx.request.body, res);
   if (res.docs.n === 1 && res.docs.nModified === 1) {
     ctx.body = { ...res, info: '修改成功' }
   } else {
