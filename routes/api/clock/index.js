@@ -27,7 +27,7 @@ router.post('/clock', async (ctx, next) => {
       date: moment(clock_date).format('YYYY-MM-DD HH:mm:ss'),
       clock_date: moment(clock_date).unix()
     })
-    ctx.body = res
+    ctx.body = { ...res, isClock: 1 }
   } else {
     ctx.body = {
       info: '当前日期已打卡',
