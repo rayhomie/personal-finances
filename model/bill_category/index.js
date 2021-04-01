@@ -17,6 +17,18 @@ class BillCategoryController {
     })
   }
 
+  findOne(json) {
+    return new Promise((resolve, reject) => {
+      BillCategoryModel.findOne(json, (err, docs) => {
+        if (err) {
+          resolve({ err, code: 1 });
+          return;
+        }
+        resolve({ docs, code: 0 })
+      })
+    })
+  }
+
   insertOne(json) {
     return new Promise(async (resolve, reject) => {
       const instance = await new BillCategoryModel(json)

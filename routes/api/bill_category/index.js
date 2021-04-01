@@ -10,6 +10,15 @@ router.get('/list', async (ctx, next) => {
   ctx.body = res
 })
 
+router.get('/getSystemCategory', async (ctx, next) => {
+  const { id } = ctx.request.query
+  const res = await billCategory.findOne({
+    is_system: 1,
+    id
+  })
+  ctx.body = res
+})
+
 /* 新增账单分类
 系统图标的id是1，2，3，4...，没有user_id
 自定义图标的id是下斜线开头的_，有user_id
