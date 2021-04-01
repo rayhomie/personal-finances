@@ -14,6 +14,7 @@ router.get('/list', async (ctx, next) => {
 系统图标的id是1，2，3，4...，没有user_id
 自定义图标的id是下斜线开头的_，有user_id
 is_system为1是系统图标0为自定义图标
+（只可以插入自定义图标）
 */
 router.post('/insert', async (ctx, next) => {
   const data = ctx.request.body
@@ -31,33 +32,41 @@ router.post('/insert', async (ctx, next) => {
   }
 })
 
-// 修改账单分类
-/*
-交换新旧index顺序的时候，需要前端同号输入新旧index
-（所以在交换index之前需要查询一下数据量中的index的正负号）
+
+/*修改账单分类
+系统内置分类不能更改(通过query_id, query_name,查询)
+可修改  name, is_income, icon_n, icon_l, icon_s
 */
 router.post('/update', async (ctx, next) => {
-  const { id, title, index, new_title, new_isIncome, new_icon, new_index } = ctx.request.body
+  const { query_id, query_name, name, is_income, icon_n, icon_l, icon_s } = ctx.request.body
+  const user_id = ctx.state.userinfo.id
   const res = await billCategory.updateOne({
-    ...(id ? { _id: ObjectId(id) } : {}),
-    ...(title ? { title } : {}),
-    ...(index ? { index } : {}),
+    ...(query_id ? { _id: ObjectId(query_id) } : {}),
+    ...(query_name ? { name: query_name } : {}),
+    user_id: ObjectId(user_id),
+    is_system: 0
   }, {
-    ...(new_title ? { title: new_title } : {}),
-    ...(new_isIncome ? { isIncome: parseInt(new_isIncome) } : {}),
-    ...(new_icon ? { icon: new_icon } : {}),
-    ...(new_index ? { index: -1 * parseInt(new_index) } : {}),
+    ...(name ? { name } : {}),
+    ...(is_income !== undefined ? { is_income } : {}),
+    ...(icon_n ? { icon_n } : {}),
+    ...(icon_l ? { icon_l } : {}),
+    ...(icon_s ? { icon_s } : {}),
   })
   ctx.body = res
 })
 
-// 删除账单分类
+/* 删除账单分类
+只能删除自定义分类
+*/
 router.delete('/delete', async (ctx, next) => {
-  const { title, id } = ctx.request.body
-  if (title || id) {
+  const { name, id } = ctx.request.body
+  const user_id = ctx.state.userinfo.id
+  if (name || id) {
     const res = await billCategory.deleteOne({
       ...(id ? { _id: ObjectId(id) } : {}),
-      ...(title ? { title } : {}),
+      ...(name ? { name } : {}),
+      user_id: ObjectId(user_id),
+      is_system: 0
     })
     ctx.body = res
   } else {
