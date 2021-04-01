@@ -1,7 +1,6 @@
 const router = require('koa-router')()
 const ObjectId = require('mongodb').ObjectId
 const billCategory = require('../../../model/bill_category/index')
-const moment = require('moment')
 
 // 获取分页的分类（只能精准查询）
 router.get('/list', async (ctx, next) => {
@@ -10,25 +9,11 @@ router.get('/list', async (ctx, next) => {
   ctx.body = res
 })
 
-/* 新增账单分类
-系统图标的id是1，2，3，4...，没有user_id
-自定义图标的id是下斜线开头的_，有user_id
-is_system为1是系统图标0为自定义图标
-*/
+// 新增账单分类
 router.post('/insert', async (ctx, next) => {
   const data = ctx.request.body
-  const user_id = ctx.state.userinfo.id
-  const { id = '', ...rest } = data
-  if (data.is_system === ('1' || 1) && id === '') {
-    ctx.body = { info: '系统图标请输入id', code: 1 }
-  } else {
-    const res = await billCategory.insertOne({
-      ...rest,
-      ...(data.is_system === ('1' || 1) ? {} : { user_id }),
-      ...(data.is_system === ('1' || 1) ? { id } : { id: `_${moment().unix()}` })
-    })
-    ctx.body = res
-  }
+  const res = await billCategory.insertOne(data)
+  ctx.body = res
 })
 
 // 修改账单分类
@@ -50,6 +35,8 @@ router.post('/update', async (ctx, next) => {
   })
   ctx.body = res
 })
+
+// 修改交换分类的index
 
 // 删除账单分类
 router.delete('/delete', async (ctx, next) => {
