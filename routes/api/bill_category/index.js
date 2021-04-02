@@ -6,7 +6,8 @@ const moment = require('moment')
 // 获取分页的分类（只能精准查询）
 router.get('/list', async (ctx, next) => {
   const data = ctx.request.query
-  const res = await billCategory.findList(data)
+  const user_id = ctx.state.userinfo.id
+  const res = await billCategory.findList({ ...data, user_id })
   ctx.body = res
 })
 
