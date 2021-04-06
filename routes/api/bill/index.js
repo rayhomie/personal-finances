@@ -82,7 +82,7 @@ router.get('/billboard', async (ctx, next) => {
         }
       },
       {// 0是支出，1是收入
-        $group: { _id: { isIncome: "$category.isIncome" }, total: { $sum: "$amount" } }
+        $group: { _id: { is_income: "$category.is_income" }, total: { $sum: "$amount" } }
       }
     ]
   )
@@ -131,7 +131,7 @@ router.get('/classifyList', async (ctx, next) => {
     // 分别计算当天的收支情况
     const lastRes = filterRes.map(i => {
       const value = i.item.reduce((pre, cur) => {
-        if (cur.category[0].isIncome === 1) {
+        if (cur.category[0].is_income === 1) {
           pre[0] = pre[0] + cur.amount
           return pre
         } else {
