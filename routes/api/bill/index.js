@@ -135,13 +135,13 @@ router.get('/classifyList', async (ctx, next) => {
           pre[0] = pre[0] + cur.amount
           return pre
         } else {
-          pre[1] = pre[1] - cur.amount
+          pre[1] = pre[1] + cur.amount
           return pre
         }
       }, [0, 0])
       return { ...i, income: value[0], expend: value[1] }
     })
-    ctx.body = lastRes
+    ctx.body = { docs: lastRes, code: 0 }
   } else {
     ctx.body = {
       info: '未查询到账单',
