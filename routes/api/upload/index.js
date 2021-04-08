@@ -21,19 +21,19 @@ router.post('/picture', async (ctx, next) => {
       people: 'rayhomie'
     },
     timeout: 60000,
-
   }
-
   //objectKey, file, options三个参数分别是：objectKey阿里云上buket中的虚拟文件地址（String）；file是读取的文件，注意这里是一个文件；options见上定义的options
-  client.multipartUpload(
+  const res = await client.multipartUpload(
     `${moment().format('YYYYMMDDHHmmss.png')}`,
     data._parts[0][1].path,
     options)
-    .then(res => {
-      ctx.body = { res: res.res, code: 0 }
-    }).catch(err => {
-      ctx.body = { err, code: 1, info: '上传失败' }
-    })
+  if (res.res.status === 200 && res.res.statusMessage === 'OK') {
+    ctx.body = { res: res.res, code: 0 }
+  } else {
+    ctx.body = { err: res.res, code: 1, info: '上传失败' }
+  }
+
+
 })
 
 module.exports = router.routes()
