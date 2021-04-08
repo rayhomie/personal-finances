@@ -1,13 +1,8 @@
 const router = require('koa-router')()
 const OSS = require('ali-oss');
 const moment = require('moment')
-
-const client = new OSS({
-  region: 'oss-cn-chengdu',
-  accessKeyId: 'LTAI5tALXBEYXwDqEprXEqDT',
-  accessKeySecret: 'jqFq4W8l8jj4KUH1jMDzewg8vZpFQm',
-  bucket: 'personal-financ'
-});
+const oss = require('../../../oss')
+const client = new OSS(oss);
 
 // 上传图片到oss
 router.post('/picture', async (ctx, next) => {
