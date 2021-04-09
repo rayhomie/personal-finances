@@ -59,6 +59,9 @@ router.get('/isClock', async (ctx, next) => {
 // 获取当前连续打卡次数
 router.get('/continueCount', async (ctx, next) => {
   const now_date = moment()
+  const resultList = await clock.getList({
+    user_id: ctx.state.userinfo.id
+  })
   const res = await clock.getList({
     user_id: ctx.state.userinfo.id,
     clock_date: { $lt: now_date.unix() }
@@ -90,12 +93,14 @@ router.get('/continueCount', async (ctx, next) => {
       }, [0, 0])
       ctx.body = {
         continue_count: result[1],
+        total: resultList.total,
         code: 0
       }
     } else {
       // 否则就是不连续
       ctx.body = {
         continue_count: 0,
+        total: resultList.total,
         code: 0
       }
     }
