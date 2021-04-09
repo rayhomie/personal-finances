@@ -1,7 +1,7 @@
 const router = require('koa-router')()
 const OSS = require('ali-oss');
 const moment = require('moment')
-const oss = require('../../../oss')
+const oss = require('../../../../oss')
 const client = new OSS(oss);
 
 // 上传图片到oss

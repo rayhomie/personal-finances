@@ -1,5 +1,5 @@
 const router = require('koa-router')()
-const jwt = require('../../jwt')
+const jwt = require('../../../jwt')
 const crypto = require("crypto")
 const moment = require('moment')
 const user = require('../../model/user/index')

@@ -1,6 +1,6 @@
 const crypto = require("crypto"),
   jwt = require("jsonwebtoken"),
-  user = require("./model/user/index"),
+  user = require("./src/model/user/index"),
   secret = require('./secret.json');
 // TODO:使用数据库
 // 这里应该是用数据库存储，这里只是演示用

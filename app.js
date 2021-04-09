@@ -10,7 +10,7 @@ const jwtKoa = require('koa-jwt')
 const secret = require('./secret.json');
 const VTM = require('./verify-token-middleware')
 
-const index = require('./routes/index')
+const index = require('./src/routes/index')
 
 // error handler
 // onerror(app)
