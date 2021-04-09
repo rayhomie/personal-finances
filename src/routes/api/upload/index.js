@@ -3,7 +3,14 @@ const OSS = require('ali-oss');
 const moment = require('moment')
 const oss = require('../../../../oss')
 const client = new OSS(oss);
-
+/*
+  {
+    region: 'oss-cn-xxxxx',
+    accessKeyId: 'xxxxxxxxxxxxxxx',
+    accessKeySecret: 'xxxxxxxxxxxx',
+    bucket: 'xxxxxxxxxx'
+  }
+*/
 // 上传图片到oss
 router.post('/picture', async (ctx, next) => {
   const data = ctx.request.body
