@@ -70,10 +70,9 @@ router.get('/rank', async (ctx, next) => {
       ...result,
       total,// 总值
       average: ParseTwoDecimalPlaces(total / days), // 平均值
-      ...(type !== '3' ? { days } : { months: days }),// 总天数
+      ...(type !== ('3' || 3) ? { days } : { months: days }),// 总天数
       classifyList: classify(res.docs)// 按日期分类的列表
     }
-
   } else {
     ctx.body = { classifyInfo: res, rankInfo: result }
   }
