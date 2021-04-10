@@ -15,16 +15,16 @@ module.exports = (date) => {
   const month = 12
   const FebruaryDays = moment(`${moment(date).format('YYYY')}-02`, "YYYY-MM").daysInMonth()
   const map = GeneratorMonthMap(FebruaryDays)
-
   const yearify = (docs) => {
+    let cur = startYearUnix
     const res = new Array(month).fill('').map((item, index) => {
-      let cur = startYearUnix
       cur = cur + map.get(index) * 86400
-      const reslut = docs.filter(i => {
-        i.bill_time >= cur
+      // console.log(moment.unix(cur), moment.unix(cur + map.get(index + 1) * 86400));
+      const reslut = docs.filter(
+        i => i.bill_time >= cur
           &&
           i.bill_time < cur + map.get(index + 1) * 86400
-      })
+      )
       // 当天的总值
       const month_total = ParseTwoDecimalPlaces(reslut.reduce((pre, cur) => pre + cur.amount, 0))
       return { date: cur, item: reslut, month_total }
