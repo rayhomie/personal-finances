@@ -14,7 +14,7 @@ const { ParseTwoDecimalPlaces } = require('../../../util/index')
 router.get('/rank', async (ctx, next) => {
   const { date, type, is_income, } = ctx.request.query
   const user_id = ObjectId(ctx.state.userinfo.id)
-  const [startUnix, endUnix, days, classify] = rank[type](ctx, date)
+  const [startUnix, endUnix, days, classify] = rank[type](date)
 
   // 按分类查询排行榜
   const result = await bill.aggregate(
