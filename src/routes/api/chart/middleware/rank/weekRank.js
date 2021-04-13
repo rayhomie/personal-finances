@@ -14,8 +14,8 @@ module.exports = (date) => {
         i.bill_time < startWeekUnix + (index + 1) * 86400
       )
       // 当天的总值
-      const day_total = ParseTwoDecimalPlaces(reslut.reduce((pre, cur) => pre + cur.amount, 0))
-      return { date: startWeekUnix + index * 86400, item: reslut, day_total }
+      const cur_total = ParseTwoDecimalPlaces(reslut.reduce((pre, cur) => pre + cur.amount, 0))
+      return { date: startWeekUnix + index * 86400, item: reslut, cur_total }
     })
     return res
   }

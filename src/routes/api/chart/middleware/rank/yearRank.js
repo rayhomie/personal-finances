@@ -26,8 +26,8 @@ module.exports = (date) => {
           i.bill_time < cur + map.get(index + 1) * 86400
       )
       // 当天的总值
-      const month_total = ParseTwoDecimalPlaces(reslut.reduce((pre, cur) => pre + cur.amount, 0))
-      return { date: cur, item: reslut, month_total }
+      const cur_total = ParseTwoDecimalPlaces(reslut.reduce((pre, cur) => pre + cur.amount, 0))
+      return { date: cur, item: reslut, cur_total }
     })
     return res
   }
