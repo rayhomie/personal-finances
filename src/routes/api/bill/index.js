@@ -178,7 +178,7 @@ router.get('/monthRank', async (ctx, next) => {
         $match: { 'category.is_income': Number(is_income) }
       },
       {
-        $sort: { [`${sort}`]: 1 }
+        $sort: { [`${sort}`]: -1 }
       }
     ]
   )
