@@ -150,4 +150,41 @@ router.get('/classifyList', async (ctx, next) => {
   }
 })
 
+/*
+    月排行
+    startMonth=2021-03
+    sort:'amount'|'bill_time'
+    is_income:0|1
+*/
+router.get('/monthRank', async (ctx, next) => {
+  const { startMonth, is_income, sort = 'amount' } = ctx.request.query
+  const user_id = ObjectId(ctx.state.userinfo.id)
+  const startUnix = moment(startMonth).unix()
+  const endUnix = moment(startMonth).add(1, 'month').unix()
+  const res = await bill.aggregate(
+    [
+      {
+        $match: { user_id, bill_time: { $gte: startUnix, $lt: endUnix } }
+      },
+      {
+        $lookup: {// 关联表查询
+          from: "bill_category",// 需要关联的表是：bill_category(非主表)
+          localField: "category_id",// bill表(主表)中需要关联的字段
+          foreignField: "_id",// bill_category(非主表)中需要关联的字段
+          as: "category"// 关联查询后把bill_category(非主表)对应结果放到bill表(主表)的category字段中
+        }
+      },
+      {
+        $match: { 'category.is_income': Number(is_income) }
+      },
+      {
+        $sort: { [`${sort}`]: 1 }
+      }
+    ]
+  )
+
+  ctx.body = res
+})
+
+
 module.exports = router.routes()
