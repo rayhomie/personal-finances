@@ -69,7 +69,7 @@ router.post('/add', async (ctx, next) => {
 })
 
 // 删除当月预算
-router.delete('/delete', async (ctx, next) => {
+router.post('/delete', async (ctx, next) => {
   const user_id = ctx.state.userinfo.id
   const startMonth = moment().startOf('month').unix()
   const endMonth = moment().endOf('month').add(1, 'day').startOf('day').unix()

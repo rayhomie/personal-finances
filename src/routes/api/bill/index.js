@@ -53,7 +53,7 @@ router.post('/update', async (ctx, next) => {
 })
 
 // 删除当前用户的指定id的某条账单
-router.delete('/delete', async (ctx, next) => {
+router.post('/delete', async (ctx, next) => {
   const { id } = ctx.request.body
   const res = await bill.deleteOne({
     user_id: ctx.state.userinfo.id,

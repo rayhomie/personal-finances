@@ -1,6 +1,7 @@
 const router = require('koa-router')()
 const ObjectId = require('mongodb').ObjectId
 const billCategory = require('../../../model/bill_category/index')
+const bill = require('../../../model/bill/index')
 const moment = require('moment')
 
 // 获取分页的分类（只能精准查询）
@@ -68,17 +69,44 @@ router.post('/update', async (ctx, next) => {
 /* 删除账单分类
 只能删除自定义分类
 */
-router.delete('/delete', async (ctx, next) => {
+router.post('/delete', async (ctx, next) => {
   const { name, id } = ctx.request.body
-  const user_id = ctx.state.userinfo.id
+  const user_id = ObjectId(ctx.state.userinfo.id)
   if (name || id) {
+    const result = await bill.aggregate(
+      [
+        {
+          $match: { user_id }
+        },
+        {
+          $lookup: {// 关联表查询
+            from: "bill_category",// 需要关联的表是：bill_category(非主表)
+            localField: "category_id",// bill表(主表)中需要关联的字段
+            foreignField: "_id",// bill_category(非主表)中需要关联的字段
+            as: "category"// 关联查询后把bill_category(非主表)对应结果放到bill表(主表)的category字段中
+          }
+        },
+        {
+          $match: { 'category._id': ObjectId(id) }
+        }
+      ]
+    )
+    result.docs.forEach(i => {
+      bill.deleteOne({
+        _id: i._id
+      })
+    })
     const res = await billCategory.deleteOne({
       ...(id ? { _id: ObjectId(id) } : {}),
       ...(name ? { name } : {}),
-      user_id: ObjectId(user_id),
+      user_id,
       is_system: 0
     })
-    ctx.body = res
+    if (res.code * result.code === 0) {
+      ctx.body = res
+    } else {
+      ctx.body = { info2: res, info1: result }
+    }
   } else {
     ctx.body = {
       code: 1, info: '请核对删除条件,删除失败'

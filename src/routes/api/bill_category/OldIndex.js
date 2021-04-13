@@ -39,7 +39,7 @@ router.post('/update', async (ctx, next) => {
 // 修改交换分类的index
 
 // 删除账单分类
-router.delete('/delete', async (ctx, next) => {
+router.post('/delete', async (ctx, next) => {
   const { title, id } = ctx.request.body
   if (title || id) {
     const res = await billCategory.deleteOne({
