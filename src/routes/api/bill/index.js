@@ -260,7 +260,6 @@ router.get('/mineAccount', async (ctx, next) => {
       const [pay_total, income_total] = cur_total
       return {
         date: cur,
-        item: reslut,
         pay_total: ParseTwoDecimalPlaces(pay_total),
         income_total: ParseTwoDecimalPlaces(income_total),
       }
