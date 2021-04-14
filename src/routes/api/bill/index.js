@@ -2,6 +2,7 @@ const router = require('koa-router')()
 const moment = require('moment')
 const ObjectId = require('mongodb').ObjectId
 const bill = require('../../../model/bill/index')
+const { ParseTwoDecimalPlaces } = require('../../../util/index')
 
 //获取当前用户的所有账单可分页
 router.get('/list', async (ctx, next) => {
@@ -185,6 +186,101 @@ router.get('/monthRank', async (ctx, next) => {
 
   ctx.body = res
 })
+
+/*
+    我的账单
+
+*/
+// 生成每月对应日期的Map
+const GeneratorMonthMap = (February) => new Map([
+  [0, 0],
+  [1, 31], [2, February], [3, 31], [4, 30], [5, 31], [6, 30],
+  [7, 31], [8, 31], [9, 30], [10, 31], [11, 30], [12, 31],
+])
+
+router.get('/mineAccount', async (ctx, next) => {
+  const { date } = ctx.query
+  const user_id = ObjectId(ctx.state.userinfo.id)
+  const startYearUnix = moment(date).startOf('year').unix()
+  const endYearUnix = moment(date).endOf('year').add(1, 'day').startOf('day').unix()
+  const res = await bill.aggregate(
+    [
+      {
+        $match: { user_id, bill_time: { $gte: startYearUnix, $lt: endYearUnix } }
+      },
+      {
+        $lookup: {// 关联表查询
+          from: "bill_category",// 需要关联的表是：bill_category(非主表)
+          localField: "category_id",// bill表(主表)中需要关联的字段
+          foreignField: "_id",// bill_category(非主表)中需要关联的字段
+          as: "category"// 关联查询后把bill_category(非主表)对应结果放到bill表(主表)的category字段中
+        }
+      }
+    ]
+  )
+  const data = await bill.aggregate(
+    [
+      {
+        $match: { user_id, bill_time: { $gte: startYearUnix, $lt: endYearUnix } }
+      },
+      {
+        $lookup: {// 关联表查询
+          from: "bill_category",// 需要关联的表是：bill_category(非主表)
+          localField: "category_id",// bill表(主表)中需要关联的字段
+          foreignField: "_id",// bill_category(非主表)中需要关联的字段
+          as: "category"// 关联查询后把bill_category(非主表)对应结果放到bill表(主表)的category字段中
+        }
+      },
+      {// 0是支出，1是收入
+        $group: { _id: { is_income: "$category.is_income", }, total: { $sum: "$amount" } }
+      },
+    ]
+  )
+  if (res.code * data.code === 0) {
+    const FebruaryDays = moment(`${moment(date).format('YYYY')}-02`, "YYYY-MM").daysInMonth()
+    const map = GeneratorMonthMap(FebruaryDays)
+    let cur = startYearUnix
+    const classify = new Array(12).fill('').map((i, index) => {
+      cur = cur + map.get(index) * 86400
+      const reslut = res.docs.filter(
+        i => i.bill_time >= cur
+          &&
+          i.bill_time < cur + map.get(index + 1) * 86400
+      )
+      // 当天的总值
+      const cur_total = reslut.reduce((pre, cur) => {
+        if (cur.category[0].is_income === 0) {
+          pre[0] = pre[0] + cur.amount
+          return pre
+        } else {
+          pre[1] = pre[1] + cur.amount
+          return pre
+        }
+      }, [0, 0])//【支出，收入】
+      const [pay_total, income_total] = cur_total
+      return {
+        date: cur,
+        item: reslut,
+        pay_total: ParseTwoDecimalPlaces(pay_total),
+        income_total: ParseTwoDecimalPlaces(income_total),
+      }
+    })
+
+    const [year_pay_total, year_income_total] = data.docs.reduce((pre, cur) => {
+      if (cur._id.is_income[0] === 0) {
+        pre[0] = ParseTwoDecimalPlaces(cur.total)
+        return pre
+      } else {
+        pre[1] = ParseTwoDecimalPlaces(cur.total)
+        return pre
+      }
+    }, [0, 0])// 【支出，收入】
+    ctx.body = { year_pay_total, year_income_total, docs: classify, code: 0 }
+  } else {
+    ctx.body = { ...res, ...data }
+  }
+})
+
 
 
 module.exports = router.routes()
