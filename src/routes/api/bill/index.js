@@ -2,7 +2,8 @@ const router = require('koa-router')()
 const moment = require('moment')
 const ObjectId = require('mongodb').ObjectId
 const bill = require('../../../model/bill/index')
-const { ParseTwoDecimalPlaces, percentify } = require('../../../util/index')
+const user = require('../../../model/user/index')
+const { ParseTwoDecimalPlaces, } = require('../../../util/index')
 
 //获取当前用户的所有账单可分页
 router.get('/list', async (ctx, next) => {
@@ -357,9 +358,13 @@ router.get('/mineAccountItem', async (ctx, next) => {
     ]
   )
 
-  const [...restRes] = await Promise.all([data, resPre, resCate])
+  const userinfo = user.findOne({
+    _id: user_id
+  })
 
-  if (restRes[0].code * restRes[1].code * restRes[2].code === 0) {
+  const [...restRes] = await Promise.all([data, resPre, resCate, userinfo])
+
+  if (!restRes.map(i => i.code).includes(1)) {
     // 当月收支情况
     const [pay_total, income_total] = restRes[0].docs.reduce((pre, cur) => {
       if (cur._id.is_income[0] === 0) {
@@ -385,22 +390,18 @@ router.get('/mineAccountItem', async (ctx, next) => {
 
     // 支出类别排行饼状图数据
     let other_total = 0
-    let other_top5 = 0
     const pieData = restRes[2].docs.reduce((pre, cur, index) => {
       if (index < 5) {
         pre[index] = {
           name: cur._id.category[0].name,
           total: cur.total,
-          proportion: percentify(cur.total, pay_total)
         }
-        other_top5 = other_top5 + percentify(cur.total, pay_total)
         return pre
       }
       if (index === restRes[2].docs.length - 1) {
         pre[5] = {
           name: '其他',
           total: other_total,
-          proportion: Math.round((100 - other_top5) * 10) / 10
         }
         return pre
       } else {
@@ -409,7 +410,19 @@ router.get('/mineAccountItem', async (ctx, next) => {
       return pre
     }, [])
 
-    ctx.body = { code: 0, pay_total, income_total, pre_month_rest, pieData }
+    const { username, avatar_url, create_time } = restRes[3].docs
+    ctx.body = {
+      code: 0,
+      pay_total,
+      income_total,
+      pre_month_rest,
+      pieData,
+      userinfo: {
+        username,
+        avatar_url,
+        joinDays: Math.ceil((moment().unix() - create_time) / 86400),
+      }
+    }
   } else {
     ctx.body = { code: 1 }
   }
