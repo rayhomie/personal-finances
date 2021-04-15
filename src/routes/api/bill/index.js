@@ -2,7 +2,7 @@ const router = require('koa-router')()
 const moment = require('moment')
 const ObjectId = require('mongodb').ObjectId
 const bill = require('../../../model/bill/index')
-const { ParseTwoDecimalPlaces } = require('../../../util/index')
+const { ParseTwoDecimalPlaces, percentify } = require('../../../util/index')
 
 //获取当前用户的所有账单可分页
 router.get('/list', async (ctx, next) => {
@@ -189,7 +189,7 @@ router.get('/monthRank', async (ctx, next) => {
 
 /*
     我的账单
-
+    date:'2021-04-02 12:40:45'
 */
 // 生成每月对应日期的Map
 const GeneratorMonthMap = (February) => new Map([
@@ -280,6 +280,137 @@ router.get('/mineAccount', async (ctx, next) => {
   }
 })
 
+/*
+    获取当月的账单报告
+    date:'2021-04-02 12:40:45'
+*/
 
+router.get('/mineAccountItem', async (ctx, next) => {
+  const { date } = ctx.query
+  const user_id = ObjectId(ctx.state.userinfo.id)
+  const startUnix = moment(date).startOf('month').unix()
+  const endUnix = moment(date).startOf('month').add(1, 'month').unix()
+  const preMonthStartUnix = moment.unix(startUnix).add(-1, 'month').unix()
+  const preMonthEndUnix = moment.unix(preMonthStartUnix).endOf('month').add(1, 'day').startOf('day').unix()
+
+  const data = bill.aggregate(
+    [
+      {
+        $match: { user_id, bill_time: { $gte: startUnix, $lt: endUnix } }
+      },
+      {
+        $lookup: {// 关联表查询
+          from: "bill_category",// 需要关联的表是：bill_category(非主表)
+          localField: "category_id",// bill表(主表)中需要关联的字段
+          foreignField: "_id",// bill_category(非主表)中需要关联的字段
+          as: "category"// 关联查询后把bill_category(非主表)对应结果放到bill表(主表)的category字段中
+        }
+      },
+      {// 0是支出，1是收入
+        $group: { _id: { is_income: "$category.is_income", }, total: { $sum: "$amount" } }
+      }
+    ]
+  )
+  const resPre = bill.aggregate(
+    [
+      {
+        $match: { user_id, bill_time: { $gte: preMonthStartUnix, $lt: preMonthEndUnix } }
+      },
+      {
+        $lookup: {// 关联表查询
+          from: "bill_category",// 需要关联的表是：bill_category(非主表)
+          localField: "category_id",// bill表(主表)中需要关联的字段
+          foreignField: "_id",// bill_category(非主表)中需要关联的字段
+          as: "category"// 关联查询后把bill_category(非主表)对应结果放到bill表(主表)的category字段中
+        }
+      },
+      {// 0是支出，1是收入
+        $group: { _id: { is_income: "$category.is_income", }, total: { $sum: "$amount" } }
+      },
+    ]
+  )
+
+  const resCate = bill.aggregate(
+    [
+      {
+        $match: { user_id, bill_time: { $gte: startUnix, $lt: endUnix } }
+      },
+      {
+        $lookup: {// 关联表查询
+          from: "bill_category",// 需要关联的表是：bill_category(非主表)
+          localField: "category_id",// bill表(主表)中需要关联的字段
+          foreignField: "_id",// bill_category(非主表)中需要关联的字段
+          as: "category"// 关联查询后把bill_category(非主表)对应结果放到bill表(主表)的category字段中
+        }
+      },
+      {
+        $match: { 'category.is_income': 0 }
+      },
+      {// 0是支出，1是收入
+        $group: { _id: { category: "$category", }, total: { $sum: "$amount" } }
+      },
+      {
+        $sort: { total: -1 }
+      },
+    ]
+  )
+
+  const [...restRes] = await Promise.all([data, resPre, resCate])
+
+  if (restRes[0].code * restRes[1].code * restRes[2].code === 0) {
+    // 当月收支情况
+    const [pay_total, income_total] = restRes[0].docs.reduce((pre, cur) => {
+      if (cur._id.is_income[0] === 0) {
+        pre[0] = ParseTwoDecimalPlaces(cur.total)
+        return pre
+      } else {
+        pre[1] = ParseTwoDecimalPlaces(cur.total)
+        return pre
+      }
+    }, [0, 0])// 【支出，收入】
+
+    // 计算上月结余
+    const [pre_pay_total, pre_income_total] = restRes[1].docs.reduce((pre, cur) => {
+      if (cur._id.is_income[0] === 0) {
+        pre[0] = ParseTwoDecimalPlaces(cur.total)
+        return pre
+      } else {
+        pre[1] = ParseTwoDecimalPlaces(cur.total)
+        return pre
+      }
+    }, [0, 0])// 【上月支出，上月收入】
+    const pre_month_rest = pre_income_total - pre_pay_total
+
+    // 支出类别排行饼状图数据
+    let other_total = 0
+    let other_top5 = 0
+    const pieData = restRes[2].docs.reduce((pre, cur, index) => {
+      if (index < 5) {
+        pre[index] = {
+          name: cur._id.category[0].name,
+          total: cur.total,
+          proportion: percentify(cur.total, pay_total)
+        }
+        other_top5 = other_top5 + percentify(cur.total, pay_total)
+        return pre
+      }
+      if (index === restRes[2].docs.length - 1) {
+        pre[5] = {
+          name: '其他',
+          total: other_total,
+          proportion: Math.round((100 - other_top5) * 10) / 10
+        }
+        return pre
+      } else {
+        other_total = other_total + cur.total
+      }
+      return pre
+    }, [])
+
+    ctx.body = { code: 0, pay_total, income_total, pre_month_rest, pieData }
+  } else {
+    ctx.body = { code: 1 }
+  }
+})
 
 module.exports = router.routes()
