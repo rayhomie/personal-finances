@@ -16,7 +16,7 @@ router.get('/rank', async (ctx, next) => {
   const [startUnix, endUnix, days, classify] = rank[type](date)
 
   // 按分类查询排行榜
-  const result = await bill.aggregate(
+  const result = bill.aggregate(
     [
       {
         $match: { user_id, bill_time: { $gte: startUnix, $lt: endUnix } }
@@ -41,7 +41,7 @@ router.get('/rank', async (ctx, next) => {
     ]
   )
   // 按日期查询账单
-  const res = await bill.aggregate(
+  const res = bill.aggregate(
     [
       {
         $match: { user_id, bill_time: { $gte: startUnix, $lt: endUnix } }
@@ -63,17 +63,18 @@ router.get('/rank', async (ctx, next) => {
     ]
   )
 
-  if (result.code * res.code === 0) {
-    const total = ParseTwoDecimalPlaces(result.docs.reduce((pre, cur) => (pre + cur.total), 0))
+  const [...restRes] = await Promise.all([result, res])
+  if (restRes[0].code * restRes[1].code === 0) {
+    const total = ParseTwoDecimalPlaces(restRes[0].docs.reduce((pre, cur) => (pre + cur.total), 0))
     ctx.body = {
-      ...result,
+      ...restRes[0],
       total,// 总值
       average: ParseTwoDecimalPlaces(total / days), // 平均值
       ...(type !== ('3' || 3) ? { days } : { months: days }),// 总天数
-      classifyList: classify(res.docs)// 按日期分类的列表
+      classifyList: classify(restRes[1].docs)// 按日期分类的列表
     }
   } else {
-    ctx.body = { classifyInfo: res, rankInfo: result }
+    ctx.body = { classifyInfo: restRes[1], rankInfo: restRes[0] }
   }
 })
 

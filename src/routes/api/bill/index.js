@@ -203,7 +203,8 @@ router.get('/mineAccount', async (ctx, next) => {
   const user_id = ObjectId(ctx.state.userinfo.id)
   const startYearUnix = moment(date).startOf('year').unix()
   const endYearUnix = moment(date).endOf('year').add(1, 'day').startOf('day').unix()
-  const res = await bill.aggregate(
+
+  const res = bill.aggregate(
     [
       {
         $match: { user_id, bill_time: { $gte: startYearUnix, $lt: endYearUnix } }
@@ -218,7 +219,7 @@ router.get('/mineAccount', async (ctx, next) => {
       }
     ]
   )
-  const data = await bill.aggregate(
+  const data = bill.aggregate(
     [
       {
         $match: { user_id, bill_time: { $gte: startYearUnix, $lt: endYearUnix } }
@@ -236,13 +237,14 @@ router.get('/mineAccount', async (ctx, next) => {
       },
     ]
   )
-  if (res.code * data.code === 0) {
+  const [...restRes] = await Promise.all([res, data])
+  if (restRes[0].code * restRes[1].code === 0) {
     const FebruaryDays = moment(`${moment(date).format('YYYY')}-02`, "YYYY-MM").daysInMonth()
     const map = GeneratorMonthMap(FebruaryDays)
     let cur = startYearUnix
     const classify = new Array(12).fill('').map((i, index) => {
       cur = cur + map.get(index) * 86400
-      const reslut = res.docs.filter(
+      const reslut = restRes[0].docs.filter(
         i => i.bill_time >= cur
           &&
           i.bill_time < cur + map.get(index + 1) * 86400
@@ -265,7 +267,7 @@ router.get('/mineAccount', async (ctx, next) => {
       }
     })
 
-    const [year_pay_total, year_income_total] = data.docs.reduce((pre, cur) => {
+    const [year_pay_total, year_income_total] = restRes[1].docs.reduce((pre, cur) => {
       if (cur._id.is_income[0] === 0) {
         pre[0] = ParseTwoDecimalPlaces(cur.total)
         return pre
@@ -276,7 +278,7 @@ router.get('/mineAccount', async (ctx, next) => {
     }, [0, 0])// 【支出，收入】
     ctx.body = { year_pay_total, year_income_total, docs: classify, code: 0 }
   } else {
-    ctx.body = { ...res, ...data }
+    ctx.body = { code: 1 }
   }
 })
 
