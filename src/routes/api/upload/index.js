@@ -18,7 +18,7 @@ router.post('/picture', async (ctx, next) => {
 
   var options = {
     // progress: progress,	//可以拿到文件上传进度；用于写进度条
-    partSize: 500 * 1024,
+    // partSize: 500 * 1024,
     meta: {
       people: 'rayhomie'
     },
