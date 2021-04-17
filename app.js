@@ -18,10 +18,11 @@ const index = require('./src/routes/index')
 // middlewares
 
 app.use(koaBody({
-  multipart: true, formidable: {
-    // maxFieldsSize: 10 * 1024 * 1024,
-    multipart: true
-  }
+  multipart: true,
+  // formidable: {
+  //   // maxFieldsSize: 10 * 1024 * 1024,
+  //   multipart: true
+  // }
 }))
 
 // app.use(bodyparser({
