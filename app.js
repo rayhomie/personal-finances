@@ -17,7 +17,12 @@ const index = require('./src/routes/index')
 
 // middlewares
 
-app.use(koaBody({ multipart: true }))
+app.use(koaBody({
+  multipart: true, formidable: {
+    // maxFieldsSize: 10 * 1024 * 1024,
+    multipart: true
+  }
+}))
 
 // app.use(bodyparser({
 //   enableTypes: ['json', 'form', 'text']
@@ -35,7 +40,7 @@ app.use(VTM())
 
 // 除去一些没必要通过jwt验证
 app.use(jwtKoa({ secret: secret.sign }).unless({
-  path: [/^\/api\/login/, /^\/api\/register/]
+  path: [/^\/api\/login/, /^\/api\/register/, /^\/api\/upload\/picture/]
 }))
 
 // logger
