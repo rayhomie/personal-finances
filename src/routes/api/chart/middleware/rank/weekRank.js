@@ -3,8 +3,11 @@ const moment = require('moment')
 const { ParseTwoDecimalPlaces } = require('../../../../../util/index')
 
 module.exports = (date) => {
-  const startWeekUnix = moment(date).startOf('week').add(1, 'day').unix()
-  const endWeekUnix = moment(date).endOf('week').add(2, 'day').startOf('day').unix()
+
+  const startWeekUnix = moment(date).weekday() !== 0
+    ? moment(date).startOf('week').add(1, 'day').unix()
+    : moment(date).add(-1, 'day').startOf('week').add(1, 'day').unix()
+  const endWeekUnix = moment.unix(startWeekUnix).add(7, 'day').unix()
   const days = (endWeekUnix - startWeekUnix) / 86400
   const weekify = (docs) => {
     const res = new Array(days).fill('').map((item, index) => {
