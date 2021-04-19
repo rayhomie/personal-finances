@@ -239,7 +239,7 @@ router.get('/mineAccount', async (ctx, next) => {
     ]
   )
   const [...restRes] = await Promise.all([res, data])
-  if (restRes[0].code * restRes[1].code === 0) {
+  if (!restRes.map(i => i.code).includes(1)) {
     const FebruaryDays = moment(`${moment(date).format('YYYY')}-02`, "YYYY-MM").daysInMonth()
     const map = GeneratorMonthMap(FebruaryDays)
     let cur = startYearUnix

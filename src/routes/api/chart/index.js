@@ -64,7 +64,7 @@ router.get('/rank', async (ctx, next) => {
   )
 
   const [...restRes] = await Promise.all([result, res])
-  if (restRes[0].code * restRes[1].code === 0) {
+  if (!restRes.map(i => i.code).includes(1)) {
     const total = ParseTwoDecimalPlaces(restRes[0].docs.reduce((pre, cur) => (pre + cur.total), 0))
     ctx.body = {
       ...restRes[0],
