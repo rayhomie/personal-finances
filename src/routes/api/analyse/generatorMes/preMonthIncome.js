@@ -25,7 +25,7 @@ const genMessage = (curArr, preArr) => {
     }
     if (level <= 0 && level > -0.3) {
       return {
-        type: 1,
+        type: 2,
         msgpay: '小财了解到收入情况稍低于上月，加油'
       }
     }

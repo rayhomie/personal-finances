@@ -25,7 +25,7 @@ const genMessage = (curArr, preArr) => {
     }
     if (level <= 0 && level > -0.3) {
       return {
-        type: 1,
+        type: 2,
         msgpay: '小财注意到您本月支出接近于上月支出了哦'
       }
     }
